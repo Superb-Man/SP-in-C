@@ -1,9 +1,7 @@
-// Shared Preference Helper which use shared_prefs.cpp as implementation
-
 #ifndef SHARED_PREF_HELPER_HPP
 #define SHARED_PREF_HELPER_HPP
 
-#include "shared_prefs.hpp"
+#include "../include/shared_prefs.hpp"
 
 enum class WriteStrategy {
     APPLY,
@@ -31,6 +29,7 @@ struct SharedPrefHelper {
 
 private :
     WriteStrategy strategy;
+    void applyOrCommit();
 };
 
 #endif

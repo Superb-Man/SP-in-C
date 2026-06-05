@@ -185,6 +185,8 @@ void Editor::apply_common() {
 void Editor::apply() {
     pthread_mutex_lock(&sp->lock);
 
+    apply_common();
+
     Snapshot* snap = (Snapshot*)malloc(sizeof(Snapshot)); 
     new (snap) Snapshot(sp->map);
     pthread_mutex_unlock(&sp->lock);
@@ -194,6 +196,8 @@ void Editor::apply() {
 
 bool Editor::commit() {
     pthread_mutex_lock(&sp->lock);
+
+    apply_common();
 
     bool ok = sp->storage->flush(sp->map);
     pthread_mutex_unlock(&sp->lock);

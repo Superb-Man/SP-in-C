@@ -1,7 +1,7 @@
 #include <iostream>
 #include <unistd.h>
-#include <cstdlib> // Required for free()
-#include "../include/shared_prefs.hpp"
+#include <cstdlib>
+#include "SharedPrefHelper.hpp"
 
 using namespace std;
 
@@ -11,27 +11,17 @@ int main() {
     while (iteration < 3) {
         cout << "\n================ ITERATION " << iteration << " ================\n";
 
-        SharedPreferences* sp = new SharedPreferences("prefs.db");
+        SharedPrefHelper helper("prefs.db");
 
-        Editor* ed1 = sp->edit()->put_string("city", "Dhaka");
-        ed1->apply();
-        
-        ed1->~Editor(); 
-        free(ed1);
+        helper.putString("city", "Dhaka");
 
-        cout << "city = " << sp->get_string("city", "none") << endl;
+        cout << "city = " << helper.getString("city", "none") << endl;
 
-        Editor* ed2 = sp->edit()->put_int("age", 21 + iteration)->put_string("name", "Alice");
-        ed2->commit();
-        
-        ed2->~Editor(); 
-        free(ed2);
+        helper.putInt("age", 21 + iteration);
+        helper.putString("name", "Alice");
 
-        cout << "age  = " << sp->get_int("age", 0) << endl;
-        cout << "name = " << sp->get_string("name", "none") << endl;
-
-        delete sp;
-
+        cout << "age  = " << helper.getInt("age", 0) << endl;
+        cout << "name = " << helper.getString("name", "none") << endl;
 
         iteration++;
     }

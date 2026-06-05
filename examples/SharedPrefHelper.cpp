@@ -1,19 +1,14 @@
-// implement of SharedPrefHelper.hpp
-
-#include "../helper/SharedPrefHelper.hpp"
+#include "SharedPrefHelper.hpp"
 
 SharedPrefHelper::SharedPrefHelper(const string& path) {
-    sp = malloc(sizeof(SharedPreferences));
-    new (sp) SharedPreferences(path);
-    editor = malloc(sizeof(Editor));
-    new (editor) Editor(sp);
+    sp = new SharedPreferences(path);
+    editor = sp->edit();
+    strategy = WriteStrategy::APPLY;                
 }
 
 SharedPrefHelper::~SharedPrefHelper() {
-    editor->~Editor();
-    free(editor);
-    sp->~SharedPreferences();
-    free(sp);
+    delete editor;
+    delete sp;
 }
 
 void SharedPrefHelper::setStrategy(WriteStrategy strategy) {
@@ -22,18 +17,22 @@ void SharedPrefHelper::setStrategy(WriteStrategy strategy) {
 
 void SharedPrefHelper::putInt(const string& key, int value) {
     editor->put_int(key, value);
+    applyOrCommit();
 }
 
 void SharedPrefHelper::putBoolean(const string& key, bool value) {
     editor->put_boolean(key, value);
+    applyOrCommit();
 }
 
 void SharedPrefHelper::putFloat(const string& key, float value) {
     editor->put_float(key, value);
+    applyOrCommit();
 }
 
 void SharedPrefHelper::putString(const string& key, const string& value) {
     editor->put_string(key, value);
+    applyOrCommit();
 }
 
 void SharedPrefHelper::remove(const string& key) {
@@ -54,4 +53,15 @@ float SharedPrefHelper::getFloat(const string& key, float def) {
 
 string SharedPrefHelper::getString(const string& key, const string& def) {
     return sp->get_string(key, def);
+}
+
+void SharedPrefHelper::applyOrCommit() {
+    switch (strategy) {
+        case WriteStrategy::APPLY:
+            editor->apply();
+            break;
+        case WriteStrategy::COMMIT:
+            editor->commit();
+            break;
+    }
 }
