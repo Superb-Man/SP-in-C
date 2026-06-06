@@ -184,14 +184,20 @@ void Editor::apply_common() {
 }   
 
 void Editor::apply() {
+    bool schedule=false;
+
     pthread_mutex_lock(&sp->lock);
 
     apply_common();
 
+    if(!sp->dirty) schedule=true;
+
     sp->dirty=true;
+
     pthread_mutex_unlock(&sp->lock);
-    
-    async_schedule(sp);
+
+    if(schedule)
+        async_schedule(sp);
 }
 
 bool Editor::commit() {
