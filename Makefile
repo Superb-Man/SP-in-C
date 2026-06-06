@@ -1,5 +1,4 @@
 CXX=g++
-# Added -g to include debug symbols so leak checkers can show exact line numbers
 CXXFLAGS=-std=c++17 -pthread -g
 
 SRC=\

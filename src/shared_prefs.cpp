@@ -4,10 +4,8 @@
 
 SharedPreferences::SharedPreferences(const string& path) {
     pthread_mutex_init(&lock, NULL);
-    map = (HashMap*)malloc(sizeof(HashMap)); 
-    new (map) HashMap(256);
-    storage = (Storage*)malloc(sizeof(Storage)); 
-    new (storage) Storage(path);
+    map = new HashMap(256);
+    storage = new Storage(path);
     storage->load(map);
     dirty = false;
     async_init();
@@ -16,9 +14,8 @@ SharedPreferences::SharedPreferences(const string& path) {
 SharedPreferences::~SharedPreferences() {
     storage->flush(map);
     async_shutdown();
-    map->~HashMap(); 
-    free(map);
-    storage->~Storage(); free(storage);
+    delete map;
+    delete storage;
     pthread_mutex_destroy(&lock);
 }
 
@@ -71,8 +68,7 @@ string SharedPreferences::get_string(const string& key, const string& def) {
 }
 
 Editor* SharedPreferences::edit() {
-    Editor* ed = (Editor*)malloc(sizeof(Editor)); 
-    new (ed) Editor(this);
+    Editor* ed = new Editor(this);
     return ed;
 }
 
@@ -81,7 +77,7 @@ Snapshot::Snapshot(HashMap* map) {
 }
 
 Snapshot::~Snapshot() {
-    copy->~HashMap(); free(copy);
+    delete copy;
 }
 
 Editor::Editor(SharedPreferences* prefs) {
@@ -94,7 +90,7 @@ Editor::~Editor() {
     operation_t* op = head;
     while (op) {
         operation_t* next = op->next;
-        op->~operation_t(); free(op);
+        delete op;
         op = next;
     }
 }
@@ -109,8 +105,7 @@ void Editor::append(operation_t* op) {
 }
 
 Editor* Editor::put_int(const string& key, int value) {
-    operation_t* op = (operation_t*)malloc(sizeof(operation_t)); 
-    new (op) operation_t();
+    operation_t* op = new operation_t();
     op->key = key;
     op->value.type = VALUE_INT;
     op->value.i = value;
@@ -122,8 +117,7 @@ Editor* Editor::put_int(const string& key, int value) {
 }
 
 Editor* Editor::put_boolean(const string& key, bool value) {
-    operation_t* op = (operation_t*)malloc(sizeof(operation_t)); 
-    new (op) operation_t();
+    operation_t* op = new operation_t();
     op->key = key;
     op->value.type = VALUE_BOOL;
     op->value.b = value;
@@ -135,8 +129,7 @@ Editor* Editor::put_boolean(const string& key, bool value) {
 }
 
 Editor* Editor::put_float(const string& key, float value) {
-    operation_t* op = (operation_t*)malloc(sizeof(operation_t)); 
-    new (op) operation_t();
+    operation_t* op = new operation_t();
     op->key = key;
     op->value.type = VALUE_FLOAT;
     op->value.f = value;
@@ -148,8 +141,7 @@ Editor* Editor::put_float(const string& key, float value) {
 }
 
 Editor* Editor::put_string(const string& key, const string& value) {
-    operation_t* op = (operation_t*)malloc(sizeof(operation_t)); 
-    new (op) operation_t();
+    operation_t* op = new operation_t();
     op->key = key;
     op->value.type = VALUE_STRING;
     op->value.s = value;
@@ -161,8 +153,7 @@ Editor* Editor::put_string(const string& key, const string& value) {
 }
 
 Editor* Editor::remove(const string& key) {
-    operation_t* op = (operation_t*)malloc(sizeof(operation_t)); 
-    new (op) operation_t();
+    operation_t* op = new operation_t();
     op->key = key;
     op->is_remove = true;
     op->next = NULL;

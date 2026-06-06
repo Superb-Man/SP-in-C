@@ -64,7 +64,7 @@ bool Storage::flush(HashMap* map) {
 
     uint32_t end = (uint32_t)-1;
     fwrite(&end, sizeof(uint32_t), 1, fp);
-    fsync(fileno(fp));
+    // fsync(fileno(fp));
     fclose(fp);
     rename("prefs.tmp", path.c_str());
     return true;

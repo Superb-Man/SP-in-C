@@ -49,16 +49,13 @@ private:
             pthread_mutex_lock(&task->sp->lock);
 
             if(task->sp->dirty) {
-
-                void* mem = malloc(sizeof(Snapshot));
-                Snapshot* snap = new(mem) Snapshot(task->sp->map);
+                Snapshot* snap = new Snapshot(task->sp->map);
                 task->sp->dirty=false;
 
                 pthread_mutex_unlock(&task->sp->lock);
 
                 task->sp->storage->flush(snap->copy);
-                snap->~Snapshot();
-                free(snap);
+                delete snap;
             }
             else {
                 pthread_mutex_unlock(&task->sp->lock);
@@ -94,6 +91,8 @@ public:
         while (current) {
             AsyncTask* next = current->next;
             current = next;
+
+            delete current;
         }
         head = NULL;
         tail = NULL;
@@ -103,9 +102,7 @@ public:
     }
 
     void schedule(SharedPreferences* sp) {
-        AsyncTask* task = (AsyncTask*)malloc(sizeof(AsyncTask));
-        task->sp = sp;
-        task->next = NULL;
+        AsyncTask* task = new AsyncTask(sp);
 
         pthread_mutex_lock(&lock);
 
@@ -125,7 +122,7 @@ static AsyncWorker* worker = NULL;
 
 void async_init() {
     if (!worker) {
-        worker = (AsyncWorker*)malloc(sizeof(AsyncWorker));
+        worker = new AsyncWorker();
         worker->init();
     }
 }
@@ -139,7 +136,7 @@ void async_schedule(SharedPreferences* sp) {
 void async_shutdown() {
     if (worker) {
         worker->destroy(); // Joins thread and clears leftover tasks
-        free(worker);
+        delete worker;
         worker = NULL;
     }
 }

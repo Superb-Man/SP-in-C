@@ -3,7 +3,7 @@
 
 HashMap::HashMap(int cap) {
     capacity = cap;
-    buckets = (entry_t**)malloc(sizeof(entry_t*) * capacity);
+    buckets = new entry_t*[capacity];
     for (int i = 0; i < capacity; i++)
         buckets[i] = NULL;
 }
@@ -13,12 +13,11 @@ HashMap::~HashMap() {
         entry_t* e = buckets[i];
         while (e) {
             entry_t* next = e->next;
-            e->~entry_t();
-            free(e);
+            delete e;
             e = next;
         }
     }
-    free(buckets);
+    delete[] buckets;
 }
 
 unsigned long HashMap::hash(const string& key) {
@@ -40,7 +39,7 @@ void HashMap::put(const string& key, const value_t& value) {
         e = e->next;
     }
     
-    entry_t* node = new (malloc(sizeof(entry_t))) entry_t(key, value);
+    entry_t* node = new entry_t(key, value);
     node->next = buckets[idx];
     buckets[idx] = node;
 }
@@ -70,8 +69,7 @@ void HashMap::remove(const string& key) {
             else
                 prev->next = e->next;
                 
-            e->~entry_t();
-            free(e);
+            delete e;
             return;
         }
         prev = e;
@@ -88,7 +86,7 @@ entry_t** HashMap::get_buckets() {
 }
 
 HashMap* HashMap::clone() {
-    HashMap* copy = new (malloc(sizeof(HashMap))) HashMap(capacity);
+    HashMap* copy = new HashMap(capacity);
     
     for (int i = 0; i < capacity; i++) {
         entry_t* e = buckets[i];
