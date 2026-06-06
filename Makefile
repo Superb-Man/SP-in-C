@@ -12,10 +12,10 @@ examples/SharedPrefHelper.cpp
 OUT=test
 
 all:
-	$(CXX) $(CXXFLAGS) $(SRC) examples/main.cpp -o $(OUT)
+	$(CXX) $(CXXFLAGS) $(SRC) examples/main2.cpp -o $(OUT)
 
 leak-asan:
-	$(CXX) $(CXXFLAGS) -fsanitize=address $(SRC) examples/main.cpp -o $(OUT)
+	$(CXX) $(CXXFLAGS) -fsanitize=address $(SRC) examples/main2.cpp -o $(OUT)
 	./$(OUT)
 
 leak-valgrind: all

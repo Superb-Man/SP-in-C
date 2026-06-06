@@ -9,6 +9,7 @@ SharedPreferences::SharedPreferences(const string& path) {
     storage = (Storage*)malloc(sizeof(Storage)); 
     new (storage) Storage(path);
     storage->load(map);
+    dirty = false;
     async_init();
 }
 
@@ -187,11 +188,10 @@ void Editor::apply() {
 
     apply_common();
 
-    Snapshot* snap = (Snapshot*)malloc(sizeof(Snapshot)); 
-    new (snap) Snapshot(sp->map);
+    sp->dirty=true;
     pthread_mutex_unlock(&sp->lock);
     
-    async_schedule(sp, snap);
+    async_schedule(sp);
 }
 
 bool Editor::commit() {

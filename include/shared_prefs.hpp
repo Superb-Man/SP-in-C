@@ -52,6 +52,8 @@ public:
     HashMap* map;
     Storage* storage;
 
+    bool dirty;
+
     SharedPreferences(const string& path);
     ~SharedPreferences();
 

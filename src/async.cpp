@@ -1,13 +1,15 @@
 #include <pthread.h>
 #include <cstdlib>
+#include <unistd.h>
 
 #include "../include/async.hpp"
 #include "../include/shared_prefs.hpp"
 
 struct AsyncTask {
     SharedPreferences* sp;
-    Snapshot* snap;
     AsyncTask* next;
+
+    AsyncTask(SharedPreferences* s) : sp(s), next(NULL) {}
 };
 
 struct AsyncWorker {
@@ -40,11 +42,29 @@ private:
                 self->tail = NULL;
 
             pthread_mutex_unlock(&self->lock);
+            // Perform the async operation (flush to disk)
+            
+            sleep(MAX_DELAY_SECS);
+            
+            pthread_mutex_lock(&task->sp->lock);
 
-            task->sp->storage->flush(task->snap->copy);
-            task->snap->~Snapshot(); 
-            free(task->snap);
-            free(task);
+            if(task->sp->dirty) {
+
+                void* mem = malloc(sizeof(Snapshot));
+                Snapshot* snap = new(mem) Snapshot(task->sp->map);
+                task->sp->dirty=false;
+
+                pthread_mutex_unlock(&task->sp->lock);
+
+                task->sp->storage->flush(snap->copy);
+                snap->~Snapshot();
+                free(snap);
+            }
+            else {
+                pthread_mutex_unlock(&task->sp->lock);
+            }
+
+            delete task;
         }
 
         return NULL;
@@ -73,9 +93,6 @@ public:
         AsyncTask* current = head;
         while (current) {
             AsyncTask* next = current->next;
-            current->snap->~Snapshot();
-            free(current->snap);
-            free(current);
             current = next;
         }
         head = NULL;
@@ -85,10 +102,9 @@ public:
         pthread_cond_destroy(&cond);
     }
 
-    void schedule(SharedPreferences* sp, Snapshot* snap) {
+    void schedule(SharedPreferences* sp) {
         AsyncTask* task = (AsyncTask*)malloc(sizeof(AsyncTask));
         task->sp = sp;
-        task->snap = snap;
         task->next = NULL;
 
         pthread_mutex_lock(&lock);
@@ -114,9 +130,9 @@ void async_init() {
     }
 }
 
-void async_schedule(SharedPreferences* sp, Snapshot* snap) {
+void async_schedule(SharedPreferences* sp) {
     if (worker) {
-        worker->schedule(sp, snap);
+        worker->schedule(sp);
     }
 }
 
