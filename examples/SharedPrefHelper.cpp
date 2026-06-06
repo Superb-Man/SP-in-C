@@ -65,3 +65,7 @@ void SharedPrefHelper::applyOrCommit() {
             break;
     }
 }
+
+void SharedPrefHelper::setDelay(int secs) {
+    sp->storage->setDelay(secs);
+}

@@ -27,6 +27,9 @@ struct SharedPrefHelper {
     float getFloat(const string& key, float def);
     string getString(const string& key, const string& def);
 
+    // setDelay(int secs)
+    void setDelay(int secs);
+
 private :
     WriteStrategy strategy;
     void applyOrCommit();

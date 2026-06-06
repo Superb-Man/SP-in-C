@@ -17,6 +17,10 @@ int main() {
 
         cout << "city = " << helper.getString("city", "none") << endl;
 
+        helper.setStrategy(WriteStrategy::COMMIT);
+        // simulate delay on commit
+        helper.setDelay(5);
+        // The delay is only for commit, so apply should be fast
         helper.putInt("age", 21 + iteration);
         helper.putString("name", "Alice");
 

@@ -29,9 +29,10 @@ static string read_string(FILE* fp) {
 
 bool Storage::flush(HashMap* map) {
     FILE* fp = fopen("prefs.tmp", "wb");
-    sleep(5);
     if (!fp)
         return false;
+    
+    sleep(delay_secs); // Simulate delay for commit
 
     uint32_t magic = MAGIC;
     fwrite(&magic, sizeof(uint32_t), 1, fp);
@@ -109,4 +110,8 @@ bool Storage::load(HashMap* map) {
 
     fclose(fp);
     return true;
+}
+
+void Storage::setDelay(int secs) {
+    delay_secs = secs;
 }
