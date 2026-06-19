@@ -63,6 +63,9 @@ void SharedPrefHelper::applyOrCommit() {
         case WriteStrategy::COMMIT:
             editor->commit();
             break;
+        case WriteStrategy::MAIN_THREAD_COMMIT:
+            editor->block_caller_and_commit();
+            break;
     }
 }
 

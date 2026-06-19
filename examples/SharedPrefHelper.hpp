@@ -3,11 +3,6 @@
 
 #include "../include/shared_prefs.hpp"
 
-enum class WriteStrategy {
-    APPLY,
-    COMMIT
-};
-
 struct SharedPrefHelper {
     SharedPreferences* sp;
     Editor* editor;

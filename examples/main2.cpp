@@ -51,7 +51,7 @@ int main() {
 
     {
         SharedPrefHelper helper2("prefs_test2.db");
-        helper2.setStrategy(WriteStrategy::COMMIT);
+        helper2.setStrategy(WriteStrategy::MAIN_THREAD_COMMIT);
 
         auto var_track_start = std::chrono::high_resolution_clock::now();
 

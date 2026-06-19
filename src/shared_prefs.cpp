@@ -4,19 +4,24 @@
 
 SharedPreferences::SharedPreferences(const string& path) {
     pthread_mutex_init(&lock, NULL);
+    pthread_cond_init(&commit_cond, NULL);
     map = new HashMap(256);
     storage = new Storage(path);
     storage->load(map);
     dirty = false;
+    pending_commits = 0;
     async_init();
 }
 
 SharedPreferences::~SharedPreferences() {
     storage->flush(map);
     async_shutdown();
+
     delete map;
     delete storage;
+
     pthread_mutex_destroy(&lock);
+    pthread_cond_destroy(&commit_cond);
 }
 
 int SharedPreferences::get_int(const string& key, int def) {
@@ -70,6 +75,13 @@ string SharedPreferences::get_string(const string& key, const string& def) {
 Editor* SharedPreferences::edit() {
     Editor* ed = new Editor(this);
     return ed;
+}
+
+void SharedPreferences::notify_commit_done() {
+    pthread_mutex_lock(&lock);
+    pending_commits--;
+    pthread_cond_broadcast(&commit_cond);
+    pthread_mutex_unlock(&lock);
 }
 
 Snapshot::Snapshot(HashMap* map) {
@@ -162,42 +174,71 @@ Editor* Editor::remove(const string& key) {
     return this;
 }
 
-void Editor::apply_common() {
+void Editor::apply_internal(WriteStrategy strategy) {
+    bool need_schedule = false;
+
+    pthread_mutex_lock(&sp->lock);
+
     operation_t* op = head;
     while (op) {
         if (op->is_remove)
             sp->map->remove(op->key);
         else
             sp->map->put(op->key, op->value);
-            
+
         op = op->next;
     }
-}   
 
-void Editor::apply() {
-    bool schedule=false;
+    if (strategy == WriteStrategy::COMMIT) {
+        sp->dirty = true;
+        sp->pending_commits++;
+    } else {
+        if (!sp->dirty)
+            need_schedule = true;
 
-    pthread_mutex_lock(&sp->lock);
-
-    apply_common();
-
-    if(!sp->dirty) schedule=true;
-
-    sp->dirty=true;
+        sp->dirty = true;
+    }
 
     pthread_mutex_unlock(&sp->lock);
 
-    if(schedule)
-        async_schedule(sp);
+    if (strategy == WriteStrategy::COMMIT)
+        async_schedule(sp, WriteStrategy::COMMIT);
+    else if (need_schedule)
+        async_schedule(sp, WriteStrategy::APPLY);
+}
+
+void Editor::apply() {
+    apply_internal(WriteStrategy::APPLY);
 }
 
 bool Editor::commit() {
+    apply_internal(WriteStrategy::COMMIT);
+
+    // Wait for flush to complete
+    pthread_mutex_lock(&sp->lock);
+    while (sp->pending_commits > 0)
+        pthread_cond_wait(&sp->commit_cond, &sp->lock);
+    pthread_mutex_unlock(&sp->lock);
+
+    return true;
+}
+
+bool Editor::block_caller_and_commit() {
     pthread_mutex_lock(&sp->lock);
 
-    apply_common();
+    operation_t* op = head;
+    while (op) {
+        if (op->is_remove)
+            sp->map->remove(op->key);
+        else
+            sp->map->put(op->key, op->value);
 
-    bool ok = sp->storage->flush(sp->map);
+        op = op->next;
+    }
+
+    Snapshot snap(sp->map);
+
     pthread_mutex_unlock(&sp->lock);
-    
-    return ok;
+
+    return sp->storage->flush_atomic(snap.copy);
 }

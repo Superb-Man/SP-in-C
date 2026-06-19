@@ -9,6 +9,12 @@
 
 using namespace std;
 
+enum class WriteStrategy {
+    APPLY,
+    COMMIT,
+    MAIN_THREAD_COMMIT
+};
+
 struct SharedPreferences;
 
 struct operation_t {
@@ -24,7 +30,7 @@ private:
     operation_t* head;
     operation_t* tail;
     void append(operation_t* op);
-    void apply_common();
+    void apply_internal(WriteStrategy strategy);
 
 public:
     Editor(SharedPreferences* prefs);
@@ -37,6 +43,7 @@ public:
     Editor* remove(const string& key);
     void apply();
     bool commit();
+    bool block_caller_and_commit();
 };
 
 struct Snapshot {
@@ -49,8 +56,10 @@ public:
 struct SharedPreferences {
 public:
     pthread_mutex_t lock;
+    pthread_cond_t commit_cond;      // Notify when commit completes
     HashMap* map;
     Storage* storage;
+    int pending_commits;              // Track in-flight commits
 
     bool dirty;
 
@@ -62,6 +71,9 @@ public:
     float get_float(const string& key, float def);
     string get_string(const string& key, const string& def);
     Editor* edit();
+    
+    // Notify async worker that commit completed
+    void notify_commit_done();
 };
 
 #endif
