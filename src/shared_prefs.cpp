@@ -10,12 +10,10 @@ SharedPreferences::SharedPreferences(const string& path) {
     storage->load(map);
     dirty = false;
     pending_commits = 0;
-    async_init();
 }
 
 SharedPreferences::~SharedPreferences() {
     storage->flush(map);
-    async_shutdown();
 
     delete map;
     delete storage;

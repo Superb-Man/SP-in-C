@@ -11,7 +11,7 @@ const int FLUSH_DELAY_MS = 1000;
 struct AsyncTask {
     SharedPreferences* sp;
     AsyncTask* next;
-    WriteStrategy strategy;  // true for commit(), false for apply()
+    WriteStrategy strategy;
 
     AsyncTask(SharedPreferences* s, WriteStrategy strategy = WriteStrategy::APPLY) : sp(s), next(nullptr), strategy(strategy) {}
 };
@@ -137,19 +137,12 @@ public:
 };
 
 static AsyncWorker* worker = nullptr;
-static int ref_count = 0;
-static pthread_mutex_t ref_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void async_init() {
-    pthread_mutex_lock(&ref_lock);
-    ref_count++;
-
     if (!worker) {
         worker = new AsyncWorker();
         worker->init();
     }
-
-    pthread_mutex_unlock(&ref_lock);
 }
 
 void async_schedule(SharedPreferences* sp, WriteStrategy strategy) {
@@ -163,14 +156,9 @@ void async_schedule_sync(SharedPreferences* sp) {
 }
 
 void async_shutdown() {
-    pthread_mutex_lock(&ref_lock);
-    ref_count--;
-
-    if (ref_count == 0 && worker) {
+    if (worker) {
         worker->destroy();
         delete worker;
         worker = nullptr;
     }
-
-    pthread_mutex_unlock(&ref_lock);
 }

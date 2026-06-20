@@ -1,4 +1,5 @@
 #include "../include/shared_prefs_manager.hpp"
+#include "../include/async.hpp"
 #include <sys/stat.h>
 
 pthread_mutex_t SharedPrefsManager::lock = PTHREAD_MUTEX_INITIALIZER;
@@ -18,6 +19,9 @@ SharedPreferences* SharedPrefsManager::get(const string& name) {
     if (it != registry.end()) {
         prefs = it->second;
     } else {
+        if (registry.empty()) {
+            async_init();
+        }
         string path = name_to_path(name);
         prefs = new SharedPreferences(path);
         registry[name] = prefs;
@@ -40,6 +44,8 @@ void SharedPrefsManager::remove(const string& name) {
 }
 
 void SharedPrefsManager::cleanup() {
+    async_shutdown();
+
     pthread_mutex_lock(&lock);
 
     for (auto& pair : registry) {
