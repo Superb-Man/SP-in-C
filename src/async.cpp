@@ -88,13 +88,13 @@ private:
 
 public:
     void init() {
-        head = NULL;
-        tail = NULL;
+        head = nullptr;
+        tail = nullptr;
         running = true;
 
-        pthread_mutex_init(&lock, NULL);
-        pthread_cond_init(&cond, NULL);
-        pthread_create(&worker, NULL, worker_loop, this);
+        pthread_mutex_init(&lock, nullptr);
+        pthread_cond_init(&cond, nullptr);
+        pthread_create(&worker, nullptr, worker_loop, this);
     }
 
     void destroy() {

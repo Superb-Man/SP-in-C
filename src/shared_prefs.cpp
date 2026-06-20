@@ -3,8 +3,8 @@
 #include <cstdlib>
 
 SharedPreferences::SharedPreferences(const string& path) {
-    pthread_mutex_init(&lock, NULL);
-    pthread_cond_init(&commit_cond, NULL);
+    pthread_mutex_init(&lock, nullptr);
+    pthread_cond_init(&commit_cond, nullptr);
     map = new HashMap(256);
     storage = new Storage(path);
     storage->load(map);
@@ -94,8 +94,8 @@ Snapshot::~Snapshot() {
 
 Editor::Editor(SharedPreferences* prefs) {
     sp = prefs;
-    head = NULL;
-    tail = NULL;
+    head = nullptr;
+    tail = nullptr;
 }
 
 Editor::~Editor() {
@@ -122,7 +122,7 @@ Editor* Editor::put_int(const string& key, int value) {
     op->value.type = VALUE_INT;
     op->value.i = value;
     op->is_remove = false;
-    op->next = NULL;
+    op->next = nullptr;
     
     append(op);
     return this;
@@ -134,7 +134,7 @@ Editor* Editor::put_boolean(const string& key, bool value) {
     op->value.type = VALUE_BOOL;
     op->value.b = value;
     op->is_remove = false;
-    op->next = NULL;
+    op->next = nullptr;
     
     append(op);
     return this;
@@ -146,7 +146,7 @@ Editor* Editor::put_float(const string& key, float value) {
     op->value.type = VALUE_FLOAT;
     op->value.f = value;
     op->is_remove = false;
-    op->next = NULL;
+    op->next = nullptr;
     
     append(op);
     return this;
@@ -158,7 +158,7 @@ Editor* Editor::put_string(const string& key, const string& value) {
     op->value.type = VALUE_STRING;
     op->value.s = value;
     op->is_remove = false;
-    op->next = NULL;
+    op->next = nullptr;
     
     append(op);
     return this;
@@ -168,7 +168,7 @@ Editor* Editor::remove(const string& key) {
     operation_t* op = new operation_t();
     op->key = key;
     op->is_remove = true;
-    op->next = NULL;
+    op->next = nullptr;
     
     append(op);
     return this;

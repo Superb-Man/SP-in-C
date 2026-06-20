@@ -1,14 +1,13 @@
 #include "SharedPrefHelper.hpp"
 
-SharedPrefHelper::SharedPrefHelper(const string& path) {
-    sp = new SharedPreferences(path);
+SharedPrefHelper::SharedPrefHelper(const string& name) {
+    sp = SharedPrefsManager::get(name);
     editor = sp->edit();
     strategy = WriteStrategy::APPLY;                
 }
 
 SharedPrefHelper::~SharedPrefHelper() {
     delete editor;
-    delete sp;
 }
 
 void SharedPrefHelper::setStrategy(WriteStrategy strategy) {

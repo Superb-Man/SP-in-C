@@ -10,7 +10,7 @@ const int NUM_ENTRIES = 163;
 int main() {
     // write a lot of data total avg time for apply, commit and get
     {
-        SharedPrefHelper helper("prefs_test.db");
+        SharedPrefHelper helper("test_prefs");
         helper.setStrategy(WriteStrategy::APPLY);
         
         auto var_track_start = std::chrono::high_resolution_clock::now();
@@ -50,7 +50,7 @@ int main() {
     }
 
     {
-        SharedPrefHelper helper2("prefs_test2.db");
+        SharedPrefHelper helper2("test_prefs");
         helper2.setStrategy(WriteStrategy::MAIN_THREAD_COMMIT);
 
         auto var_track_start = std::chrono::high_resolution_clock::now();
@@ -74,10 +74,7 @@ int main() {
             (double)us
         );
     }
-
-    // delete the test files , but not deleted!
-    remove("prefs_test.db");
-    remove("prefs_test2.db");
+    SharedPrefsManager::cleanup();
 
     return 0;
 }

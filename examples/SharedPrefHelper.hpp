@@ -1,14 +1,14 @@
 #ifndef SHARED_PREF_HELPER_HPP
 #define SHARED_PREF_HELPER_HPP
 
-#include "../include/shared_prefs.hpp"
+#include "../include/shared_prefs_manager.hpp"
 
 struct SharedPrefHelper {
     SharedPreferences* sp;
     Editor* editor;
 
     
-    SharedPrefHelper(const string& path);
+    SharedPrefHelper(const string& name);
     ~SharedPrefHelper();
 
     void setStrategy(WriteStrategy strategy = WriteStrategy::APPLY);

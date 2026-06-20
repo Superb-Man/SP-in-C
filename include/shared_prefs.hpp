@@ -9,6 +9,8 @@
 
 using namespace std;
 
+class SharedPrefsManager;
+
 enum class WriteStrategy {
     APPLY,
     COMMIT,
@@ -54,6 +56,11 @@ public:
 };
 
 struct SharedPreferences {
+    friend class SharedPrefsManager;  // Only SharedPrefsManager can create instances
+
+private:
+    SharedPreferences(const string& path);
+
 public:
     pthread_mutex_t lock;
     pthread_cond_t commit_cond;      // Notify when commit completes
@@ -63,7 +70,6 @@ public:
 
     bool dirty;
 
-    SharedPreferences(const string& path);
     ~SharedPreferences();
 
     int get_int(const string& key, int def);

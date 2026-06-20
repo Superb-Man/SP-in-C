@@ -6,6 +6,7 @@ src/hashmap.cpp \
 src/storage.cpp \
 src/shared_prefs.cpp \
 src/async.cpp \
+src/shared_prefs_manager.cpp \
 examples/SharedPrefHelper.cpp
 
 OUT=test

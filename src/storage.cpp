@@ -21,7 +21,7 @@ pthread_mutex_t* Storage::get_file_lock(const string& filepath) {
     
     if (file_locks.find(filepath) == file_locks.end()) {
         pthread_mutex_t* new_lock = new pthread_mutex_t;
-        pthread_mutex_init(new_lock, NULL);
+        pthread_mutex_init(new_lock, nullptr);
         file_locks[filepath] = new_lock;
     }
     
