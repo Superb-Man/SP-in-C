@@ -62,7 +62,7 @@ You can also run:
 ./test
 ```
 
-## Additional Targets
+## Additional Targets (from current `Makefile`)
 
 ```bash
 make leak-asan      # Build with AddressSanitizer and run
@@ -90,5 +90,5 @@ Core API classes:
 
 ## Notes
 
-- Call `SharedPrefsManager::cleanup()` before process exit to release resources and stop async worker threads cleanly.
+- If your program calls `SharedPrefsManager::get(...)`, call `SharedPrefsManager::cleanup()` once before exit to stop the async worker and release managed instances cleanly.
 - Preference files are created under `.shared_prefs/` relative to the working directory.
