@@ -70,6 +70,11 @@ make leak-valgrind  # Run valgrind leak check
 make clean          # Remove built binary
 ```
 
+Prerequisites:
+
+- `leak-asan` requires a compiler/toolchain with AddressSanitizer support.
+- `leak-valgrind` requires `valgrind` to be installed and available in `PATH`.
+
 ## Quick Usage
 
 The examples use `SharedPrefHelper`, which wraps the core API:
