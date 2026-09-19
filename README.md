@@ -10,8 +10,8 @@ This project implements a local preferences system inspired by Android SharedPre
 - Batched writes through an `Editor`
 - Multiple write strategies:
   - `APPLY` (asynchronous, non-blocking)
-  - `COMMIT` (waits for async flush completion)
-  - `MAIN_THREAD_COMMIT` (synchronous flush on caller thread)
+  - `COMMIT` (caller blocks until persistence completes, flush is performed by worker thread)
+  - `MAIN_THREAD_COMMIT` (caller thread performs the flush immediately)
 - File-backed persistence in `.shared_prefs/<name>.sp`
 - Atomic persistence workflow with temp file + backup + transaction log
 - Basic recovery support after interrupted writes
